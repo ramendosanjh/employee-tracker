@@ -1,8 +1,25 @@
-const { promot } = require("inquirer");
+const { prompt } = require("inquirer");
 const logo = require("asciiart-logo");
 const db = require("./db");
+const mysql = require('mysql2');
 
 init();
+
+// Connect to mysql
+const mysql = require('mysql2');
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'username',
+  password: 'yourPassword',
+  database: 'yourDatabaseName',
+});
+
+connection.connect((err) => {
+  if (err) throw err;
+  console.log('Connected to the MySQL server');
+
+}
+
 
 // Display logo text, load main prompts
 function init() {
@@ -13,7 +30,7 @@ function init() {
     loadMainPrompts();  
 }
 
-function loadMainPrompts
+function loadMainPrompts() {
 prompt([
     {
         type: "list",
@@ -83,7 +100,7 @@ prompt([
             }
         ]
     }
-]).then(res => {
+]).then((res => {
     let choice = res.choice;
     // Call the appropriate function depending on what the user chose
     switch (choice) {
@@ -132,11 +149,11 @@ prompt([
         default:
             quit();
     }
+});
 }
-) 
-}
+
 // View all Employees
-function viewEmployees(){
+function viewEmployees() {
     db.findAllEmployees()
         .then(([rows]) => {
             let employees = rows;
@@ -144,6 +161,7 @@ function viewEmployees(){
             console.table(employees);
         })
         .then(() => loadMainPrompts());
+}
 
 // View all employees that belong to a department
 function viewEmployeesByDepartment() {
@@ -172,10 +190,10 @@ function viewEmployeesByDepartment() {
                     .then(() => loadMainPrompts())
                 });
 
-            }
+}
 // View all employees that report to specific manager
 function viewEmployeesByManager() {
-    db.findAllEmployees(
+    db.findAllEmployees()
         .then(([rows]) => {
             let managers = rows;
             const managerChoices = mnagers.map(({id, first_name, last_name }) => ({
@@ -209,7 +227,7 @@ function viewEmployeesByManager() {
 
 // Delete an Employee
 function removeEmployee() {
-    db findAllEmployees()
+    db.findAllEmployees()
         .then(([rows]) => {
             let employees = rows;
             const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
@@ -262,7 +280,7 @@ function updateEmployeeManager() {
                 value: id
             }));
 
-            promot([
+            prompt([
                 {
                     type: "list",
                     name: "employeeId",
@@ -293,7 +311,7 @@ function updateEmployeeManager() {
                                 .then(() => console.log("Updated employee's manager"))
                                 .then(() => loadMainPrompts ())
                         })
-                })
+                });
             }
 // View all roles
 function viewRoles() {
@@ -438,7 +456,7 @@ function addEmployee() {
             message: "what is the employee's last name?"
         }
     ])
-        .then(res => {
+        .then(res
             let firstName = res,first_name;
             let lastName = res.last_name;
             
@@ -450,15 +468,14 @@ function addEmployee() {
                         value: id
                     }));
 
-                    promot ({
+                    prompt({
                         type: "list",
                         name: "roleId",
                         message: "what is the employee's role?",
                         choices: roleChoices
-                        
-    ])
-}
-
-
-
-
+                    })
+                        .then(res => db.removeRole(res.roleId))
+                        .then(() => console.log('Removed role from the database'))
+                        .then(() => loadMainPrompts())
+                });
+ }
