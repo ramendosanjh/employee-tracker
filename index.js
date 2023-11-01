@@ -1,24 +1,15 @@
 const { prompt } = require("inquirer");
 const logo = require("asciiart-logo");
-const db = require("./db");
-const mysql = require('mysql2');
-
 init();
 
 // Connect to mysql
 const mysql = require('mysql2');
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'username',
-  password: 'yourPassword',
-  database: 'yourDatabaseName',
+  user: 'root',
+  password: 'Harjinder97',
+  database: 'et_db',
 });
-
-connection.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to the MySQL server');
-
-}
 
 
 // Display logo text, load main prompts
@@ -28,7 +19,7 @@ function init() {
     console.log(logoText);
 
     loadMainPrompts();  
-}
+};
 
 function loadMainPrompts() {
 prompt([
@@ -100,7 +91,8 @@ prompt([
             }
         ]
     }
-]).then((res => {
+
+]).then((res) => {
     let choice = res.choice;
     // Call the appropriate function depending on what the user chose
     switch (choice) {
@@ -117,7 +109,7 @@ prompt([
             addEmployee();
             break;
         case "REMOVE_EMPLOYEE":
-            removeEmployee;
+            removeEmployee();
             break;
         case "UPDATE_EMPLOYEE_ROLE":
             updateEmployeeRole();
@@ -132,13 +124,13 @@ prompt([
             addDepartment();
             break;
         case "REMOVE_DEPARTMENT":
-            removeDepartment;
+            removeDepartment();
             break;
         case "VIEW_UTILIZED_BUDGET_BY_DEPARTMENT":
             viewUtilizedBudgetByDepartment();
             break;
         case "VIEW_ROLES":
-            viewRoles;
+            viewRoles();
             break;
         case "ADD_ROLE":
             addRole();
@@ -148,9 +140,10 @@ prompt([
             break;
         default:
             quit();
-    }
+    
+        }
 });
-}
+
 
 // View all Employees
 function viewEmployees() {
@@ -161,7 +154,7 @@ function viewEmployees() {
             console.table(employees);
         })
         .then(() => loadMainPrompts());
-}
+    }
 
 // View all employees that belong to a department
 function viewEmployeesByDepartment() {
@@ -180,7 +173,7 @@ function viewEmployeesByDepartment() {
                     message: "Which department would you like to see employees for?",
                     choices: departmentChoices
                     }
-                ]}
+                ])
                     .then(res => db.findAllEmployeesByDepartment(res.departmentId))
                     .then(([rows]) => {
                         let employees = rows;
@@ -189,14 +182,15 @@ function viewEmployeesByDepartment() {
                     })
                     .then(() => loadMainPrompts())
                 });
-
 }
+
+
 // View all employees that report to specific manager
 function viewEmployeesByManager() {
     db.findAllEmployees()
         .then(([rows]) => {
             let managers = rows;
-            const managerChoices = mnagers.map(({id, first_name, last_name }) => ({
+            const managerChoices = managers.map(({ id, first_name, last_name }) => ({
                 name: '${first_name} ${last_name}',
                 value: id
             }));
@@ -208,7 +202,7 @@ function viewEmployeesByManager() {
                     message: "Which employee do you want to see direct reports for?",
                     choices: managerChoices
                 }
-            ])
+                ])
                 .then(res => db.findAllEmployeesByManager(res.managerId))
                 .then(([rows]) => {
                     let employees = rows;
@@ -220,7 +214,7 @@ function viewEmployeesByManager() {
                     }
 
                 })
-                .then(() => loadMainPrompts())
+                .then(() => loadMainPrompts());
 
     });
 }
@@ -242,13 +236,13 @@ function removeEmployee() {
                     message: "Which employee do you want to remove?",
                     choices: employeeChoices
                 }
-            ])
+                ])
                 .then(res => {
                     let employeeId = res.employeeId;
                     db.findAllRoles()
                     .then(([rows]) => {
                         let roles = rows;
-                        const rolesChoices = roles.map(({ id, title } => ({
+                        const rolesChoices = roles.map(({ id, title }) => ({
                             name: title, 
                             value: id
                         }));
@@ -266,7 +260,7 @@ function removeEmployee() {
                             .then(() => loadMainPrompts())
                     });
                 });
-        })
+        });
 
 }
 
@@ -289,7 +283,7 @@ function updateEmployeeManager() {
                 }
             ])
                 .then(res => {
-                    let employeeId = res.employeeId
+                    let employeeId = res.employeeId;
                     db.findAllPossibleManagers(employeeId)
                         .then(([rows]) => {
                             let managers = rows;
@@ -309,10 +303,11 @@ function updateEmployeeManager() {
                             ])
                                 .then(res => db.updateEmployeeManager(employeeId, res.managerId))
                                 .then(() => console.log("Updated employee's manager"))
-                                .then(() => loadMainPrompts ())
-                        })
+                                .then(() => loadMainPrompts ());
+                        });
                 });
-            }
+        });
+}
 // View all roles
 function viewRoles() {
     db.findAllRoles()
@@ -456,8 +451,8 @@ function addEmployee() {
             message: "what is the employee's last name?"
         }
     ])
-        .then(res
-            let firstName = res,first_name;
+        .then((res) => {
+            let firstName = res.first_name;
             let lastName = res.last_name;
             
             db.findAllRoles()
@@ -474,8 +469,12 @@ function addEmployee() {
                         message: "what is the employee's role?",
                         choices: roleChoices
                     })
-                        .then(res => db.removeRole(res.roleId))
-                        .then(() => console.log('Removed role from the database'))
+                        .then(res => db.addEmployee(firstName, lastName, res.roleId)) 
+                        .then(() => console.log('Added employee to the database'))
                         .then(() => loadMainPrompts())
+                    });
                 });
- }
+              };
+            
+    }
+            
