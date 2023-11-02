@@ -1,14 +1,14 @@
-const { prompt } = require("inquirer");
+const inquirer = require('inquirer');
+const mysql = require('mysql2');
 const logo = require("asciiart-logo");
 init();
 
 // Connect to mysql
-const mysql = require('mysql2');
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: 'Harjinder97',
-  database: 'et_db',
+  database: 'ecommerce_db ',
 });
 
 
@@ -22,8 +22,9 @@ function init() {
 };
 
 function loadMainPrompts() {
-prompt([
-    {
+    inquirer
+        .prompt([
+         {
         type: "list",
         name: "choice",
         message: "What would you like to do?",
@@ -89,11 +90,11 @@ prompt([
                 name: "Quit",
                 value: "QUIT"
             }
-        ]
-    }
-
-]).then((res) => {
-    let choice = res.choice;
+        ],
+    },
+])
+.then((answers) => {
+    let choice = answers.choice;
     // Call the appropriate function depending on what the user chose
     switch (choice) {
         case "VIEW_EMPLOYEES":
@@ -142,9 +143,9 @@ prompt([
             quit();
     
         }
-});
+    });
 
-
+}
 // View all Employees
 function viewEmployees() {
     db.findAllEmployees()
@@ -191,7 +192,8 @@ function viewEmployeesByManager() {
         .then(([rows]) => {
             let managers = rows;
             const managerChoices = managers.map(({ id, first_name, last_name }) => ({
-                name: '${first_name} ${last_name}',
+                name: `${first_name} ${last_name}`,
+        
                 value: id
             }));
 
@@ -348,8 +350,8 @@ function addRole() {
             ])
                 .then(role => {
                     db.createRole(role)
-                    .then(() => console.log('Added ${role.title} to the database'))
-                    .then(() => leadedMainPrompts())
+                    .then(() => console.log(`Added ${role.title} to the database`))
+                    .then(() => loadedMainPrompts())
                 })
         })
     }
@@ -370,7 +372,7 @@ function removeRole() {
                 name: "roleId",
                 message:
                 "which role do you want to remove (warning: this will also remove employees)",
-                choices: roleChoices 
+                choices: rolesChoices 
             }
         ])
             .then(res => db.removeRole(res.roleID))
@@ -401,7 +403,7 @@ function addDepartment() {
         .then(res => {
             let name = res;
             db.createDepartment(name)
-            .then(() => console.log('Added ${name.name} to the database'))
+            .then(() => console.log(`Added ${name.name} to the database`))
             .then(() => loadMainPrompts())
 })
 }
@@ -458,7 +460,7 @@ function addEmployee() {
             db.findAllRoles()
                 .then(([rows]) => {
                     let roles = rows;
-                    const roleChoices = roles.map(({ id, title }) => ({
+                    const rolesChoices = roles.map(({ id, title }) => ({
                         name: title,
                         value: id
                     }));
@@ -467,7 +469,7 @@ function addEmployee() {
                         type: "list",
                         name: "roleId",
                         message: "what is the employee's role?",
-                        choices: roleChoices
+                        choices: rolesChoices
                     })
                         .then(res => db.addEmployee(firstName, lastName, res.roleId)) 
                         .then(() => console.log('Added employee to the database'))
@@ -476,5 +478,4 @@ function addEmployee() {
                 });
               };
             
-    }
             
