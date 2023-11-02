@@ -10,10 +10,9 @@ This project uses Node.js, Inquirer version 8.2.4, and MySQL to create a content
 ## Installation
 
 To run this application, you need to install the necessary dependencies. Use the following command in your project folder:
-
-```bash
-npm install
-node. index.js
+`bash`
+`npm install`
+`node. index.js`
 
 ### Screenshot of content management system CMS
 
